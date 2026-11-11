@@ -40,13 +40,20 @@ describe('Database migrations (integration)', () => {
       await dataSource.query(`DROP TABLE IF EXISTS "${table}" CASCADE`);
     }
     await dataSource.query('DROP TABLE IF EXISTS "migrations" CASCADE');
+    // PostgreSQL enums survive DROP TABLE; migration replay must start clean.
+    await dataSource.query(
+      'DROP TYPE IF EXISTS "public"."verification_tokens_type_enum"',
+    );
   });
 
   afterAll(async () => {
     // The second test undoes the video migration.
     // Re-apply so the shared DB is fully migrated when subsequent suites run.
-    await dataSource.runMigrations();
-    await dataSource.destroy();
+    try {
+      await dataSource.runMigrations();
+    } finally {
+      await dataSource.destroy();
+    }
   });
 
   it('should apply all migrations and create all five tables', async () => {

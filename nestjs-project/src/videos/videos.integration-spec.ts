@@ -49,9 +49,12 @@ describe('Videos infrastructure (integration)', () => {
   afterAll(async () => {
     await module?.close();
     if (db?.isInitialized) {
-      await db.runMigrations();
-      await cleanAllTables(db);
-      await db.destroy();
+      try {
+        await db.runMigrations();
+        await cleanAllTables(db);
+      } finally {
+        await db.destroy();
+      }
     }
   });
   it('reverses and restores the video migration on a real database', async () => {
