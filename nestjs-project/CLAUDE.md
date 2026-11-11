@@ -159,3 +159,8 @@ NestJS with standard module structure. Source lives in `src/`, compiled output i
 ## REST Conventions
 
 This is a RESTful API. All endpoints must follow standard REST conventions — correct HTTP methods, proper status codes, plural resource nouns, and consistent URL structure. Details are enforced via rules on controller files.
+
+## Phase 03 runtime
+The runnable backend now uses `Dockerfile` (Node 22 LTS + FFmpeg); `Dockerfile.dev` remains a legacy development shell image. Build/install happens during `docker compose build`. Compose starts API after migration and a separate `worker` after API health. No source bind mount is enabled by default: rebuild after source edits. Start only infrastructure when that is the request: `docker compose up -d db mailpit queue storage-init`.
+
+See root AGENTS/CLAUDE "Phase 03 — Videos" and `../docs/phases/phase-03-videos/README.md` for upload contracts, endpoints, Redis/MinIO, retries and acceptance checks. Worker entrypoint: `src/worker/main.ts`; it creates an application context without HTTP/auth/mail. API entrypoint imports VideosModule but starts no queue consumer. `.env.example` documents video configuration.

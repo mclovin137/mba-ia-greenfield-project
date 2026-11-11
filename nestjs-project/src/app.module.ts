@@ -3,6 +3,7 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { VideosModule } from './videos/videos.module';
 import { AuthModule } from './auth/auth.module';
 import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
@@ -34,6 +35,7 @@ import { envValidationSchema } from './config/env.validation';
       }),
     }),
     AuthModule,
+    VideosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

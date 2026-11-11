@@ -1,0 +1,50 @@
+name: Backend videos
+on:
+  push:
+    branches: [dev, 'feature/**']
+  pull_request:
+    branches: [dev, main]
+permissions:
+  contents: read
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compose-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: nestjs-project
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure container environment
+        run: |
+          cp .env.example .env
+          sed -i 's|S3_PUBLIC_ENDPOINT=.*|S3_PUBLIC_ENDPOINT=http://storage:9000|' .env
+          docker compose config --quiet
+      - name: Build and start API infrastructure
+        run: docker compose up -d --build --wait nestjs-api
+      - name: Unit and real infrastructure integration tests
+        run: docker compose exec -T nestjs-api npm test -- --runInBand
+      - name: Ensure migrated schema before HTTP tests
+        run: docker compose exec -T nestjs-api npm run migration:run
+      - name: HTTP and real video-worker tests
+        run: docker compose exec -T nestjs-api npm run test:e2e -- --runInBand
+      - name: Typecheck
+        run: docker compose exec -T nestjs-api npx tsc --noEmit
+      - name: Lint
+        run: docker compose exec -T nestjs-api npm run lint
+      - name: Build
+        run: docker compose exec -T nestjs-api npm run build
+      - name: Verify standalone worker container
+        run: |
+          docker compose up -d --wait worker
+          docker compose exec -T worker ffmpeg -version
+          docker compose ps
+      - name: Show service logs
+        if: always()
+        run: docker compose logs --no-color --tail=200
+      - name: Clean up isolated CI volumes
+        if: always()
+        run: docker compose down -v
