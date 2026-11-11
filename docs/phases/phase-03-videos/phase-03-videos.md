@@ -80,12 +80,12 @@ Queue `video-processing`, job `process-video`, payload `{version:1, videoId:UUID
 SI-03.1 → SI-03.2 → SI-03.3 → SI-03.4. API and worker share VideosCoreModule; only worker instantiates the queue producer/consumer and reconciliation.
 
 ## Deliverables
-- [ ] SDK/model/storage/queue/worker and migration
-- [ ] Owner multipart API and ready-only public delivery
-- [ ] Real processing, metadata, thumbnail, cleanup and retries
-- [ ] `docker compose exec nestjs-api npm test -- --runInBand`
-- [ ] `docker compose exec nestjs-api npm run test:e2e -- --runInBand`
-- [ ] `docker compose exec nestjs-api npx tsc --noEmit`
-- [ ] `docker compose exec nestjs-api npm run lint` and `npm run build`
-- [ ] Full 10GiB opt-in transfer (document separately if not exercised)
-- [ ] AGENTS/CLAUDE, runbook and progress updated; feature branch pushed
+- [x] SDK/model/storage/queue/worker and migration
+- [x] Owner multipart API and ready-only public delivery
+- [x] Real processing, metadata, thumbnail, cleanup and retries
+- [x] `docker compose exec nestjs-api npm test -- --runInBand`
+- [x] `docker compose exec nestjs-api npm run test:e2e -- --runInBand`
+- [x] `docker compose exec nestjs-api npx tsc --noEmit`
+- [x] `docker compose exec nestjs-api npm run lint` and `npm run build`
+- [ ] Full 10GiB opt-in transfer — not exercised; boundary contracts passed, manual capacity utility documented
+- [x] AGENTS/CLAUDE, runbook and progress updated; feature branch pushed

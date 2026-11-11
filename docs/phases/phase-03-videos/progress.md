@@ -1,15 +1,15 @@
 # Phase 03 — Progress
 
-Status: implemented_awaiting_compose_acceptance
+Status: completed — functional acceptance passed in Compose; full-size capacity exercise not executed
 
 Research → context → validate → resolve → build completed before implementation. Validation: clean. Tool: Codex, manual pipeline; no fabricated subagent/MCP executions.
 
 | SI | Status | Verification |
 |---|---|---|
-| SI-03.1 | implemented | entity/migration/Compose/storage/queue authored; real infrastructure suite pending |
-| SI-03.2 | implemented | 12 videos service/DTO unit tests passed |
-| SI-03.3 | implemented | 3 processing unit tests passed; real FFmpeg e2e authored |
-| SI-03.4 | implemented | local 75 tests / 10 suites passed; tsc, lint, build passed; Compose acceptance pending |
+| SI-03.1 | completed | real migration up/down, DB constraints, signed multipart/ranges/download and Redis retry/deduplication passed |
+| SI-03.2 | completed | 12 unit tests plus real HTTP ownership/multipart/state checks passed |
+| SI-03.3 | completed | 3 unit tests; real FFmpeg success/thumbnail and corrupt-video retry/error e2e passed |
+| SI-03.4 | completed | 219 tests in 30 suites passed in Compose; tsc, lint, build and standalone worker passed |
 
 ## Evidence
 - `npm test -- --runInBand src/videos/videos.service.spec.ts src/worker/video-processing.service.spec.ts`: 15/15 passed.
@@ -17,13 +17,13 @@ Research → context → validate → resolve → build completed before impleme
 - `npx tsc --noEmit`: exit 0.
 - `npm run lint`: exit 0, no disabled rules.
 - `npm run build`: exit 0.
-- Supplementary runtime: Node v24.22.1 on host (container targets Node 22 LTS); Docker binary/socket absent. See root AGENTS documented fallback. Full Compose checks are authoritative and remain pending.
-- CI workflow `Backend videos` authored for full unit/integration/e2e, tsc, lint, build and standalone worker in containers.
+- Supplementary runtime: Node v24.22.1 on host (container targets Node 22 LTS); Docker binary/socket absent. See root AGENTS documented fallback. Full Compose checks are authoritative and subsequently passed in GitHub Actions (see final evidence below).
+- CI workflow `Backend videos` ran full unit/integration/e2e, tsc, lint, build and standalone worker in containers; all steps passed.
 - Exact 10GiB accepted by DTO/database contract tests and e2e upload initiation; complete 10GiB transfer NOT executed. `scripts/upload-video.ts` supports explicit capacity verification with a real source file.
 
 ## Review and deviations
 - Context7 unavailable: official AWS/BullMQ/FFmpeg/TypeORM/Codex references used directly and recorded.
-- Docker unavailable: no claim of green real-service suites. All SIs were authored and locally checked; per-SI real-service gating could not run here.
+- Docker was unavailable locally. All SIs were authored and locally checked; per-SI real-service gating could not run locally. The entire real-service suite subsequently passed in remote Compose CI.
 - TypeORM CLI unavailable before containers: migration authored using TypeORM Table API; integration round-trip is provided.
 - Baseline full lint initially reported 150 errors in legacy test typing and a driver-error cast. Fixed types and mock references without weakening assertions/rules. Existing migration suite updated to include Videos migration.
 - No feature or UI work outside videos; frontend unchanged. No branch commits to main.
@@ -45,3 +45,24 @@ Real storage quotas, TLS/production credentials, retained queue history and orph
 - The stack now boots successfully in Compose. While reviewing full integration execution, fixed the legacy migration reset to drop its surviving PostgreSQL enum before replay; database connections close in finally even if migration restoration fails. This preserves failure reporting and prevents a failed test from leaking the connection pool.
 
 - The first full Compose test execution reported 160 passed / 3 failed (26 suites). Logs confirmed the legacy enum replay failure and two new test-harness defects: TypeORM save mutated a shared fixture, so the intended duplicate INSERT became an UPDATE; dynamic SDK imports in cleanup required Jest VM modules. Fixtures now use a fresh object per insert and SDK command imports are static. Assertions and production constraints remain intact. The leaked migration pool explained the test process remaining open.
+
+## Final Compose evidence
+
+Run: https://github.com/mclovin137/mba-ia-greenfield-project/actions/runs/43082855405
+Code commit: `5ae0e193e49fe915b831b89ab4dee18a169f0e89`. Job: `compose-acceptance`, conclusion: success.
+
+| Check | Result |
+|---|---|
+| Build/start API + PostgreSQL/MinIO/Redis/Mailpit | passed |
+| npm test -- --runInBand | 163/163 tests, 26/26 suites passed |
+| Migration replay before HTTP suite | passed |
+| npm run test:e2e -- --runInBand | 56/56 tests, 4/4 suites passed |
+| npx tsc --noEmit | exit 0 |
+| npm run lint | exit 0 |
+| npm run build | exit 0; both runtime entrypoints present |
+| Standalone worker container + FFmpeg | passed; FFmpeg 5.1.9-0+deb12u1 |
+| Full 10GiB binary transfer | not executed; capacity utility and boundary contracts provided |
+
+The video e2e suite passed with real media processing, stored MP4/JPEG, Range 206 delivery, download attachment, owner/stranger JWTs, concurrent idempotent completion, multipart size rejection/cancellation and corrupt-video retries ending in error. The infrastructure suite also checked Range 416, DB maximum-size/unique/FK constraints and real Redis retries/deduplication. No external-service mocks were substituted in these suites.
+
+Final documentation update exports the backend OpenAPI contract from compiled controller/DTO metadata (no handler invocation/DB I/O for this supplementary export) and aligns the architecture diagram with the SQL intent/worker dispatch design. The real AppModule OpenAPI integration/export tests separately passed in the Compose suite. Frontend remains unchanged.
