@@ -11,3 +11,5 @@
 | Codex | configuration format | AGENTS.md, .codex/config.toml MCP | https://developers.openai.com/codex/guides/agents-md ; https://developers.openai.com/codex/mcp |
 
 Context7 unavailable in execution tool registry. Official pages consulted directly before implementation; no MCP result is claimed. Lockfile fixes exact transitive versions. FFmpeg patch version follows the Debian base image; inspect `ffmpeg -version` in the built container for deployment provenance.
+
+MinIO/mc images use official `quay.io/minio/` release tags because Docker Hub community repositories are unavailable. Official reference: https://github.com/minio/minio/blob/master/docs/orchestration/docker-compose/docker-compose.yaml .

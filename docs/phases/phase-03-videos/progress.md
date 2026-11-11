@@ -17,7 +17,7 @@ Research → context → validate → resolve → build completed before impleme
 - `npx tsc --noEmit`: exit 0.
 - `npm run lint`: exit 0, no disabled rules.
 - `npm run build`: exit 0.
-- Supplementary runtime: Node 22-compatible toolchain on host; Docker binary/socket absent. See root AGENTS documented fallback. Full Compose checks are authoritative and remain pending.
+- Supplementary runtime: Node v24.22.1 on host (container targets Node 22 LTS); Docker binary/socket absent. See root AGENTS documented fallback. Full Compose checks are authoritative and remain pending.
 - CI workflow `Backend videos` authored for full unit/integration/e2e, tsc, lint, build and standalone worker in containers.
 - Exact 10GiB accepted by DTO/bank contract tests and e2e upload initiation; complete 10GiB transfer NOT executed. `scripts/upload-video.ts` supports explicit capacity verification with a real source file.
 
@@ -30,3 +30,6 @@ Research → context → validate → resolve → build completed before impleme
 
 ## Operational follow-ups
 Real storage quotas, TLS/production credentials, retained queue history and orphaned worker temp files after SIGKILL require deployment-level policies as described in README.
+
+## CI execution
+- First Actions run 42939605072 reached Docker Compose but Docker Hub no longer served `minio/mc`; no tests ran in that attempt. Changed MinIO and mc to the official quay.io registry with the same fixed release tags. Re-running acceptance.
