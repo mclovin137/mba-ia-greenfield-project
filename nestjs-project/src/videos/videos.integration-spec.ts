@@ -1,3 +1,4 @@
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'node:crypto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
@@ -84,7 +85,7 @@ describe('Videos infrastructure (integration)', () => {
       source_key: randomUUID(),
       expires_at: new Date(Date.now() + 60000),
     };
-    const video = await db.getRepository(Video).save(fields);
+    const video = await db.getRepository(Video).save({ ...fields });
     expect(video.public_id).toMatch(/^[0-9a-f-]{36}$/);
     expect(
       Number(
@@ -149,7 +150,6 @@ describe('Videos infrastructure (integration)', () => {
       await download.arrayBuffer();
     } finally {
       await storage.abort(key, upload);
-      const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
       await storage.internal.send(
         new DeleteObjectCommand({ Bucket: videoConfig().bucket, Key: key }),
       );

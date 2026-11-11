@@ -1,3 +1,4 @@
+import { DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -109,7 +110,6 @@ describe('Videos (e2e, real PostgreSQL/MinIO/Redis/FFmpeg)', () => {
       await workerModule.close();
     }
     if (app) {
-      const { DeleteObjectsCommand } = await import('@aws-sdk/client-s3');
       const storage = app.get(StorageService);
       for (const video of created) {
         const row = await db.getRepository(Video).findOneBy({ id: video.id });
