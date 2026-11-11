@@ -19,7 +19,7 @@ Research → context → validate → resolve → build completed before impleme
 - `npm run build`: exit 0.
 - Supplementary runtime: Node v24.22.1 on host (container targets Node 22 LTS); Docker binary/socket absent. See root AGENTS documented fallback. Full Compose checks are authoritative and remain pending.
 - CI workflow `Backend videos` authored for full unit/integration/e2e, tsc, lint, build and standalone worker in containers.
-- Exact 10GiB accepted by DTO/bank contract tests and e2e upload initiation; complete 10GiB transfer NOT executed. `scripts/upload-video.ts` supports explicit capacity verification with a real source file.
+- Exact 10GiB accepted by DTO/database contract tests and e2e upload initiation; complete 10GiB transfer NOT executed. `scripts/upload-video.ts` supports explicit capacity verification with a real source file.
 
 ## Review and deviations
 - Context7 unavailable: official AWS/BullMQ/FFmpeg/TypeORM/Codex references used directly and recorded.
@@ -35,3 +35,5 @@ Real storage quotas, TLS/production credentials, retained queue history and orph
 - First Actions run 42939605072 reached Docker Compose but Docker Hub no longer served `minio/mc`; no tests ran in that attempt. Changed MinIO and mc to the official quay.io registry with the same fixed release tags. Re-running acceptance.
 
 - Quay returned 401 in run 42939748086. Compose now builds the official MinIO/mc tagged source releases instead of relying on removed/inaccessible historical images. Dockerfile retains upstream licenses. Acceptance retry pending.
+
+- Source-build run 42939949882 exposed npm 10 vs npm 11 lockfile differences before tests. Regenerated the lockfile using npm 10.9.9 (container npm); `npm@10.9.9 ci --dry-run` passed. Consolidated push/PR CI concurrency to avoid duplicate builds.

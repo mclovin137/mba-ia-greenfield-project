@@ -13,7 +13,8 @@ interface Status {
 }
 async function main() {
   const path = process.argv[2];
-  const token = process.env.VIDEO_TOKEN;
+  let token = process.env.VIDEO_TOKEN;
+  let refreshToken = process.env.VIDEO_REFRESH_TOKEN;
   if (!path || !token)
     throw new Error(
       'Usage: VIDEO_TOKEN=... ts-node scripts/upload-video.ts /media/video.mp4',
@@ -35,6 +36,23 @@ async function main() {
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
+    if (response.status === 401 && refreshToken && route !== '/auth/refresh') {
+      await response.arrayBuffer();
+      const refreshed = await fetch(`${base}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      if (!refreshed.ok)
+        throw new Error(`Session refresh failed: ${refreshed.status}`);
+      const next = (await refreshed.json()) as {
+        access_token: string;
+        refresh_token: string;
+      };
+      token = next.access_token;
+      refreshToken = next.refresh_token;
+      return api<T>(route, method, body);
+    }
     if (!response.ok)
       throw new Error(`API ${response.status}: ${await response.text()}`);
     return response.json() as Promise<T>;

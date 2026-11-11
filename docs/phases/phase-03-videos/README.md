@@ -50,11 +50,11 @@ Para exercitar uma transferência real de até 10GiB forneça um vídeo local ao
 
 ```bash
 # Execute no container, com o arquivo montado em /media/large.mp4 e JWT válido.
-docker compose exec -e VIDEO_TOKEN="$VIDEO_TOKEN" nestjs-api \
+docker compose exec -e VIDEO_TOKEN="$VIDEO_TOKEN" -e VIDEO_REFRESH_TOKEN="$VIDEO_REFRESH_TOKEN" nestjs-api \
   npx ts-node scripts/upload-video.ts /media/large.mp4
 ```
 
-O utilitário lê uma parte por vez, envia diretamente ao storage e espera processamento. Registre tamanho exato, duração, resultado, pico de RSS e disco do worker para sua evidência de capacidade. Não confunda teste de contrato do limite com transferência integral.
+Defina os dois tokens retornados pelo login, pois uma transferência grande pode exceder os 15 minutos do access token; o utilitário renova a sessão ao receber 401. O utilitário lê uma parte por vez, envia diretamente ao storage e espera processamento. Registre tamanho exato, duração, resultado, pico de RSS e disco do worker para sua evidência de capacidade. Não confunda teste de contrato do limite com transferência integral.
 
 ## Operação e recuperação
 
