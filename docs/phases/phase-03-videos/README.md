@@ -11,6 +11,8 @@ docker compose ps
 docker compose logs -f worker
 ```
 
+MinIO e mc são compilados a partir das fontes oficiais e tags fixas pelo `docker/Dockerfile.minio`, porque os registros históricos de imagens deixaram de estar acessíveis. A primeira compilação precisa baixar os módulos Go e pode levar alguns minutos.
+
 A API aplica migrations antes de servir; o worker espera a API saudável. O bucket é privado e o init configura expiração de multipart incompleto. Redis persiste AOF. Credenciais do exemplo destinam-se ao desenvolvimento; use credenciais e TLS próprios no deploy. `storage-init` terminar com exit 0 é esperado.
 
 Entre containers use `db`, `storage`, `queue` e `mailpit`. Apenas `S3_PUBLIC_ENDPOINT` usa o hostname acessível ao cliente (por exemplo `http://localhost:9000` em desenvolvimento). Nunca substitua o hostname de uma URL já assinada. Em testes feitos dentro do container use `S3_PUBLIC_ENDPOINT=http://storage:9000` no `.env` e recrie os containers. A origem do navegador está em `UPLOAD_ALLOWED_ORIGIN`.

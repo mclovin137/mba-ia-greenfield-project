@@ -13,3 +13,5 @@
 Context7 unavailable in execution tool registry. Official pages consulted directly before implementation; no MCP result is claimed. Lockfile fixes exact transitive versions. FFmpeg patch version follows the Debian base image; inspect `ffmpeg -version` in the built container for deployment provenance.
 
 MinIO/mc images use official `quay.io/minio/` release tags because Docker Hub community repositories are unavailable. Official reference: https://github.com/minio/minio/blob/master/docs/orchestration/docker-compose/docker-compose.yaml .
+
+Quay also returned 401 for the fixed historical server tag in CI. Final Compose builds official MinIO and mc community sources from those release tags using `docker/Dockerfile.minio` (Go 1.24), retaining their AGPL license. Reference: https://github.com/minio/minio#source-only-distribution . No third-party storage image is substituted.

@@ -33,3 +33,5 @@ Real storage quotas, TLS/production credentials, retained queue history and orph
 
 ## CI execution
 - First Actions run 42939605072 reached Docker Compose but Docker Hub no longer served `minio/mc`; no tests ran in that attempt. Changed MinIO and mc to the official quay.io registry with the same fixed release tags. Re-running acceptance.
+
+- Quay returned 401 in run 42939748086. Compose now builds the official MinIO/mc tagged source releases instead of relying on removed/inaccessible historical images. Dockerfile retains upstream licenses. Acceptance retry pending.
