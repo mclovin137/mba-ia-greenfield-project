@@ -10,7 +10,7 @@ Implement all capabilities in context.md, following TD-01..05. Validation planni
 ## Step Implementations
 
 ### SI-03.1 — Infrastructure and model
-Add pinned SDK/BullMQ dependencies, typed video config/Joi, MinIO private bucket/CORS/lifecycle, Redis AOF/noeviction, worker Dockerfile and Compose services. Create Video entity and reversible migration using TypeORM Table API (CLI unavailable without container). Add repository abstraction, row locking and processing-intent scan.
+Add pinned SDK/BullMQ dependencies, typed video config/Joi, MinIO private bucket/CORS/native stale-upload expiry, Redis AOF/noeviction, worker Dockerfile and Compose services. Create Video entity and reversible migration using TypeORM Table API (CLI unavailable without container). Add repository abstraction, row locking and processing-intent scan.
 **Dependencies:** Fases 01–02.
 **Tests:** migration/entity/storage/queue real integration checks in videos.integration-spec.ts.
 **Acceptance:** real services reachable; migration up/down; unique public IDs/FK/checks.

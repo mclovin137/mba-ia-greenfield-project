@@ -39,3 +39,5 @@ Real storage quotas, TLS/production credentials, retained queue history and orph
 - Source-build run 42939949882 exposed npm 10 vs npm 11 lockfile differences before tests. Regenerated the lockfile using npm 10.9.9 (container npm); `npm@10.9.9 ci --dry-run` passed. Consolidated push/PR CI concurrency to avoid duplicate builds.
 
 - Container build run 42940323734 found the image working directory owned by root. Fixed ownership before the non-root build. Build config now explicitly scopes rootDir/include to src, preserving `dist/main.js` and `dist/worker/main.js` after adding the optional upload script. Added explicit entrypoint existence checks locally. Migration test teardown now drops dependent tables sequentially to avoid CASCADE deadlocks.
+
+- CI run 43080458713 successfully built the API and official MinIO/mc sources. Storage init rejected an abort-only lifecycle rule in the fixed MinIO release. Replaced that incompatible rule with the release's native `MINIO_API_STALE_UPLOADS_EXPIRY=24h` and hourly cleanup; application worker cancellation remains unchanged. S3 production lifecycle guidance remains documented.
