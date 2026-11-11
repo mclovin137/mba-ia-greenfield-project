@@ -37,3 +37,5 @@ Real storage quotas, TLS/production credentials, retained queue history and orph
 - Quay returned 401 in run 42939748086. Compose now builds the official MinIO/mc tagged source releases instead of relying on removed/inaccessible historical images. Dockerfile retains upstream licenses. Acceptance retry pending.
 
 - Source-build run 42939949882 exposed npm 10 vs npm 11 lockfile differences before tests. Regenerated the lockfile using npm 10.9.9 (container npm); `npm@10.9.9 ci --dry-run` passed. Consolidated push/PR CI concurrency to avoid duplicate builds.
+
+- Container build run 42940323734 found the image working directory owned by root. Fixed ownership before the non-root build. Build config now explicitly scopes rootDir/include to src, preserving `dist/main.js` and `dist/worker/main.js` after adding the optional upload script. Added explicit entrypoint existence checks locally. Migration test teardown now drops dependent tables sequentially to avoid CASCADE deadlocks.
