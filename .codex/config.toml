@@ -1,0 +1,7 @@
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.postgres]
+command = "docker"
+args = ["compose", "-f", "nestjs-project/compose.yaml", "run", "--rm", "-T", "mcp-postgres"]

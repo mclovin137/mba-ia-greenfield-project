@@ -12,7 +12,7 @@ const validate = (env: Record<string, string>) =>
   envValidationSchema.validate(
     { ...requiredEnv, ...env },
     { allowUnknown: true, abortEarly: false },
-  );
+  ) as { value: Record<string, unknown>; error?: Error };
 
 describe('envValidationSchema — SWAGGER_ENABLED', () => {
   it('should reject SWAGGER_ENABLED with an invalid value', () => {

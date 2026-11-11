@@ -12,18 +12,18 @@ This is a monorepo with two main areas:
 
 - `nestjs-project/` — Backend API (NestJS 11, TypeScript, Express). Contains modules for users, channels, videos, comments, etc.
 - `docs/` — Project documentation, architecture diagrams, and planning.
-- `next-frontend/` (Next.js) — not yet initialized
+- `next-frontend/` — existing Next.js authentication UI (Fases 01–02)
 
 ## Architecture (C4 Container Diagram)
 
 See `docs/diagrams/software-arch.mermaid` for the full diagram. Key containers:
 
 - **Frontend** (Next.js) → calls API via REST, streams from Object Storage
-- **API** (Nest.js) → business rules, auth, reads/writes DB, uploads to storage, publishes jobs to queue, sends emails
+- **API** (Nest.js) → business rules, auth, reads/writes DB, coordinates direct uploads, persists durable processing intents, sends emails
 - **Video Worker** (FFmpeg) → consumes jobs from queue, processes videos, updates DB and storage
 - **Database** (PostgreSQL) → users, channels, videos, comments, likes
 - **Object Storage** (S3/MinIO) → video files and thumbnails
-- **Message Queue** (TBD) → video processing job queue
+- **Message Queue** (BullMQ + Redis 7) → video processing job queue
 - **Email Service** (SMTP) → account confirmation and password recovery
 
 ## Docker Networking
@@ -105,3 +105,14 @@ Skip documentation lookup only for trivial operations such as:
 
 If a library is involved and there is uncertainty, documentation lookup is mandatory.
 If the documentation returned does not match the installed version, flag the discrepancy before proceeding.
+## Phase 03 — Videos
+
+Implemented backend files live in `nestjs-project/src/videos/` and `nestjs-project/src/worker/`. `VideosModule` exposes owner-only multipart control routes (`POST /videos/uploads`, `POST /videos/:id/upload-parts/:partNumber`, `POST /videos/:id/complete`, `DELETE /videos/:id/upload`, `GET /videos/:id/status`) through the global JWT guard. `GET /videos/:publicId` and `/stream`, `/download`, `/thumbnail` are public only when ready. UUID routes use ParseUUIDPipe. See `docs/phases/phase-03-videos/phase-03-videos.md` for request, error and authorization contracts.
+
+The private MinIO bucket stores originals and derived files. Uploads go directly to S3 in 64MiB parts, never through the API; maximum 10GiB inclusive. The API validates authoritative storage sizes. SQL row locks serialize owner operations. SQL `processing` state is a durable queue intent; the worker reconciles every 5s and publishes deterministic BullMQ IDs to Redis 7. Separate worker container (concurrency 1, max 3 attempts) invokes FFmpeg/ffprobe, streams files to temporary disk, generates H.264/AAC faststart MP4 and JPEG, persists metadata and ready/error, cleans temporary attempts. SDK multipart upload also supports derived objects larger than 5GiB.
+
+Status: draft → processing → ready/error; unfinished draft can be cancelled/expired. Public media routes issue 307 redirects to 15-minute S3 signed reads; S3 serves Range/206/416. Stable URLs use unique public UUIDs. Worker and API share the model/storage/repository module; only worker instantiates the queue producer/consumer.
+
+Compose adds `storage`, `storage-init`, `queue`, `worker`, persistent volumes and the optional `mcp-postgres` tool profile. API runs migrations at startup; worker waits for a healthy API. Internal hosts use service names; only S3_PUBLIC_ENDPOINT names the client-reachable address. The backend Dockerfile includes FFmpeg. Setup and acceptance commands: `docs/phases/phase-03-videos/README.md`. Full tests must use an isolated DB and stopped standalone worker. The test harness boots its own real worker.
+
+Planning artifacts and verification evidence live in `docs/phases/phase-03-videos/`; no frontend changes are included.
